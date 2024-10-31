@@ -1,0 +1,25 @@
+{"rollcalls":[
+  {
+    "avatar_big_url":"",
+    "class_name":"",
+    "course_id":67471,
+    "course_title":"数据结构",
+    "created_by":117428,
+    "created_by_name":"范时平",
+    "department_name":"软件理论与工程系",
+    "grade_name":"",
+    "group_set_id":0,
+    "is_expired":false,
+    "is_number":false,
+    "is_radar":false,
+    "published_at":null,
+    "rollcall_id":164734,
+    "rollcall_status":"in_progress",
+    "rollcall_time":"2024-09-19T02:14:29Z",
+    "scored":true,
+    "source":"qr",
+    "status":"absent",
+    "student_rollcall_id":0,
+    "title":"2024.09.19 10:14",
+    "type":"qr_rollcall"
+  }]}
