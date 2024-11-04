@@ -1,56 +1,55 @@
 package com.huang.utils;
 
+
+import cn.hutool.core.codec.Base64;
+import cn.hutool.crypto.asymmetric.KeyType;
+import cn.hutool.crypto.asymmetric.RSA;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.Cipher;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 
-@Component
+@Slf4j
 public class RSAUtil {
+    private  static RSA rsa;
+    //服务器的私钥
+    private static String privateKey;
+    //传给前端的公钥
+    public static String publicKey;
 
-    /**
-     * RSA公钥加密
-     *
-     * @param str       加密字符串
-     * @param publicKey 公钥
-     * @return 密文
-     * @throws Exception 加密过程中的异常信息
-     */
-    public static String encrypt(String str, String publicKey) throws Exception {
-        // base64编码的公钥
-        byte[] decoded = Base64.getDecoder().decode(publicKey);
-        RSAPublicKey pubKey = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(decoded));
-        // RSA加密
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.ENCRYPT_MODE, pubKey);
-        return Base64.getEncoder().encodeToString(cipher.doFinal(str.getBytes(StandardCharsets.UTF_8)));
+    static {
+        rsa = new RSA();
+        privateKey = rsa.getPrivateKeyBase64();
+        publicKey = rsa.getPublicKeyBase64();
     }
 
     /**
-     * RSA私钥解密
-     *
-     * @param str        加密字符串
-     * @param privateKey 私钥
-     * @return 明文
-     * @throws Exception 解密过程中的异常信息
+     * 刷新密钥对的方法，会有定时任务来执行
      */
-    public static String decrypt(String str, String privateKey) throws Exception {
-        // 64位解码加密后的字符串
-        byte[] inputByte = Base64.getDecoder().decode(str);
-        // base64编码的私钥
-        byte[] decoded = Base64.getDecoder().decode(privateKey);
-        RSAPrivateKey priKey = (RSAPrivateKey) KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(decoded));
-        // RSA解密
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.DECRYPT_MODE, priKey);
-        return new String(cipher.doFinal(inputByte));
+    public static void refreshKey() {
+        rsa = new RSA();
+        privateKey = rsa.getPrivateKeyBase64();
+        publicKey = rsa.getPublicKeyBase64();
     }
 
+    /**
+     * 使用rsa进行加密
+     * @param content 加密前数据
+     * @return 加密后的数据
+     */
+    public static String encrypt(String content) {
+        byte[] encrypt = rsa.encrypt(content, KeyType.PublicKey);
+        return Base64.encode(encrypt);
+    }
+
+    /**
+     * 解密前端传入的加密数据的方法，
+     * @param str 前端传入的加密数据 AES的加密密钥
+     * @return 解密之后的数据，如果解密失败则返回 null
+     */
+    public static String decrypt(String str)  {
+        byte[] decrypt = rsa.decrypt(str, KeyType.PrivateKey);
+        return new String(decrypt);
+    }
 
 }
