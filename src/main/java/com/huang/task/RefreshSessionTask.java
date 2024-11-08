@@ -14,6 +14,8 @@ public class RefreshSessionTask {
 
     private final SessionController sessionController;
 
+
+
     @Scheduled(cron = "0 0 12 * * 3")
     public void refreshSession() {
         log.info("定时任务正在执行....");

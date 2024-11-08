@@ -1,4 +1,4 @@
-package com.huang.wb.dimain;
+package com.huang.wb.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;

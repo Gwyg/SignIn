@@ -130,4 +130,44 @@ public class SessionController {
         return res;
     }
 
+    /**
+     * 获取服务端的RSA密钥
+     * @return RSA公钥
+     */
+    @GetMapping("/getRSAKey")
+    public String getRSAKey(){
+        return RSAUtil.publicKey;
+    }
+
+    @GetMapping("/number")
+    public String number(String unicode) throws Exception {
+        if (unicode == null || unicode.isEmpty()){
+            throw new Exception("统一认证码不能为空");
+        }
+        log.info("{}正在签到：{}",UserCommon.usernameMap.get(unicode),unicode);
+        String session = UserCommon.sessionMap.get(unicode);
+        if(session == null || !session.startsWith("V2")  || session.isEmpty()){
+            log.info("账号session为空");
+            String s = signIn.getsession(unicode, UserCommon.userMap.get(unicode));
+            log.info("获取session：{}",s);
+            if(!s.startsWith("V2")){
+                return "用户不存在或账号密码错误";
+            }
+            UserCommon.sessionMap.put(unicode,s);
+            session = s;
+        }
+        List<String> list = signIn.getAllClass(session);
+        if(list == null || list.isEmpty()){
+            return "没有签到任务";
+        }
+        String s = list.get(0);
+        String[] split = s.split(",");
+        String courseId = split[0];
+        String rollCallId = split[1];
+        String data = signIn.getNumberData(courseId, rollCallId, session);
+        String res = signIn.signInNumber(data, rollCallId, session);
+        log.info("{} 签到成功",UserCommon.usernameMap.get(unicode));
+        return res;
+    }
+
 }

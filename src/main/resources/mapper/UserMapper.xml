@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.huang.mapper.UserMapper">
+
+    <insert id="insertUser" parameterType="com.huang.domain.User">
+    insert into user(unicode, password, session, name, nickname, photo, head_photo, isnotice)
+    values(#{unicode}, #{password}, #{session}, #{name}, #{nickname}, #{photo}, #{headPhoto}, 0)
+    </insert>
+</mapper>

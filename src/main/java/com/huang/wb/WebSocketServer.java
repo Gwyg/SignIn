@@ -1,7 +1,7 @@
 package com.huang.wb;
 
 import cn.hutool.json.JSONUtil;
-import com.huang.wb.dimain.ChatMessage;
+import com.huang.wb.domain.ChatMessage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -12,6 +12,7 @@ import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
@@ -28,6 +29,10 @@ public class WebSocketServer {
      */
     @Getter
     private static final ConcurrentHashMap<String, Session> sessionPools = new ConcurrentHashMap<>();
+    //存储聊天消息的集合
+    private static ConcurrentLinkedQueue<ChatMessage> chatMessages = new ConcurrentLinkedQueue<>();
+    // 统计消息数量
+    private static AtomicInteger messageNum = new AtomicInteger();
     /**
      * 发送消息
      * @param session session

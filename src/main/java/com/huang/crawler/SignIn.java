@@ -92,7 +92,7 @@ public class SignIn {
                 .addHeader("X-Forwarded-User", "P338kFwtHL4GEPN3")
                 .addHeader("X-Requested-With", "XMLHttpRequest")
                 .addHeader("X-SESSION-ID", session)
-                .url("http://lms.tc.cqupt.edu.cn/api/radar/rollcalls?api_version=1.10")
+                .url("http://lms.tc.cqupt.edu.cn/api/radar/rollcalls?api_version=1.1.0")
                 .get()
                 .build();
 
@@ -156,8 +156,7 @@ public class SignIn {
     }
 
     /**
-     * 签到接口
-     *
+     * 签到接口 二维码签到
      * @param data       请求体参数
      * @param rollCallId rollCallId
      * @param session    session
@@ -167,7 +166,6 @@ public class SignIn {
     public String signIn(String data, String rollCallId, String session){
         Request request;
         try{
-
             RequestBody requestBody = RequestBody.create(data.getBytes());
             request = new Request.Builder()
                     .addHeader("Accept-Language", "zh-Hans")
@@ -194,6 +192,73 @@ public class SignIn {
         } catch (IOException ex) {
             log.info("签到请求发送失败：{}",ex.getMessage());
             throw new RuntimeException(ex.getMessage());
+        } finally {
+            cookie.clear();
+        }
+
+    }
+
+    public String signInNumber(String data, String rollCallId, String session){
+        log.info("正在进行数字签到data：{}",data);
+        Request request;
+        try{
+            RequestBody requestBody = RequestBody.create(data.getBytes());
+            request = new Request.Builder()
+                    .addHeader("Accept-Language", "zh-Hans")
+                    .addHeader("Host", "lms.tc.cqupt.edu.cn")
+                    .addHeader("Origin", "http://mobile.tc.cqupt.edu.cn")
+                    .addHeader("Referer", "http://mobile.tc.cqupt.edu.cn/")
+                    .addHeader("X-Forwarded-User", "P338kFwtHL4GEPN3")
+                    .addHeader("X-Requested-With", "XMLHttpRequest")
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("X-SESSION-ID", session)
+                    .url("http://lms.tc.cqupt.edu.cn/api/rollcall/" + rollCallId + "/answer_number_rollcall")
+                    .put(requestBody)
+                    .build();
+        }catch (Exception exception){
+            log.info("构建签到请求失败");
+            return "签到失败：" + exception.getMessage();
+        }
+        log.info("正在发送请求");
+        try (Response response = client.newCall(request).execute();){
+            if (!response.isSuccessful()) {
+                log.info("签到请求发送失败：{}",response.message());
+                return "签到失败：" + response.message();
+            }
+            if (response.body() == null) {
+                return response.message();
+            }
+            return "签到成功："+response.body().string();
+        } catch (IOException ex) {
+            log.info("签到请求发送失败：{}",ex.getMessage());
+            throw new RuntimeException(ex.getMessage());
+        } finally {
+            cookie.clear();
+        }
+    }
+
+    public String getNumberData(String courseId, String rollCallId, String session) {
+        log.info("正在获取数字签到的data");
+        Request request = new Request.Builder()
+                .addHeader("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
+                .addHeader("Host", "lms.tc.cqupt.edu.cn")
+                .addHeader("Origin", "http://mobile.tc.cqupt.edu.cn")
+                .addHeader("Referer", "http://mobile.tc.cqupt.edu.cn/")
+                .addHeader("X-Forwarded-User", "P338kFwtHL4GEPN3")
+                .addHeader("X-SESSION-ID", session)
+                .url("http://lms.tc.cqupt.edu.cn/api/course/" + courseId + "/rollcall/" + rollCallId + "/number_code")
+                .get()
+                .build();
+        try(Response response = client.newCall(request).execute()) {
+            if (response.body() == null) {
+                log.info("获取data的请求发送失败：{}",response.message());
+                throw new Exception("获取签到data失败");
+            }
+            log.info("获取到的data:{}",response.body().string());
+            return response.body().string();
+        } catch (Exception e) {
+            log.info("获取data的请求发送失败：{}",e.getMessage());
+            throw new RuntimeException(e.getMessage());
         } finally {
             cookie.clear();
         }
